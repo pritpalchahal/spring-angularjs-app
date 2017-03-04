@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+<title>Ping Application</title>
+<link href="css/angular-bootstrap.css" rel="stylesheet">
+<style type="text/css">
+[ng\:cloak], [ng-cloak], .ng-cloak {
+  display: none !important;
+}
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 5px;
+}
+</style>
+</head>
+
+<body ng-app="ping">
+  <div class="container">
+    <h1>Ping Application</h1>
+    <div ng-controller="mainCtrl" ng-cloak class="ng-cloak">
+		<div style="margin-top:10px;margin-bottom:40px">
+			<h4>Add new host</h4>
+			<p><input type="text" ng-model="host" style="width:100%"/></p>
+			<p><button ng-click="addHost()">Submit</button></p>
+		</div>
+		<p><button ng-click="delete()">Delete Selected</button></p>
+		<table border="2">
+			<tr>
+				<td></td>
+				<td>Index</td>
+				<td>Host Name</td>
+				<td>Response Time</td>
+			</tr>
+			<tr ng-repeat="host in hosts">
+				<td>
+					<input type="checkbox" ng-click="select(host)">
+				</td>
+				<td>{{$index}}</td>
+				<td>{{host.name}}</td>
+				<td>{{host.time}}</td>
+			</tr>
+		</table>
+    </div>
+  </div>
+  <script src="js/angular-bootstrap.js" type="text/javascript"></script>
+  <script src="js/ping.js"></script>
+</body>
+</html>
