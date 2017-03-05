@@ -1,16 +1,8 @@
 package com.example;
 
+import java.util.Arrays;
+
 /**
- * Assumptions regarding host names:
- * No-IP Free host names must be no longer than 19 characters in length. 
- * They can contain the letters a-z, numbers 0-9 and special character – (dash).
- * 
- * Plus Managed DNS host names can be up to 49 characters in length. 
- * They can contain the letters a-z, numbers 0-9 and special character – (dash).
- * 
- * Basic Host name Guidelines:
- * You cannot have more than two dashes within a host name.
- * A host name cannot have any spaces, nor can it start with a dash.
  * 
  * **/
 
@@ -20,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import org.apache.commons.validator.routines.InetAddressValidator;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -34,6 +27,9 @@ import org.springframework.http.HttpStatus;
 @SpringBootApplication
 @RestController
 public class PingApplication {
+
+	//a validator to validate ip address
+	static InetAddressValidator validator = InetAddressValidator.getInstance();
 	
 	/**
 	 * Method accepts a list of host names, ping them and
@@ -50,14 +46,14 @@ public class PingApplication {
 		Map<String,Integer> result = new HashMap<String,Integer>();
 		String[] hosts = hostList.split(",");
 		
-		// Arrays.asList(hosts)
-			// .stream()
-			// .forEach(host -> result.put(host,ping(host)));
+		 Arrays.asList(hosts)
+			 .stream()
+			 .forEach(host -> result.put(host,ping(host)));
 		
-		for(int i=0;i<hosts.length;i++){
-			String host = hosts[i];
-			result.put(host,ping(host));
-		}
+//		for(int i=0;i<hosts.length;i++){
+//			String host = hosts[i];
+//			result.put(host,ping(host));
+//		}
 		System.out.println("time: "+(System.currentTimeMillis()-startTime));
 		return result;
 	}
@@ -74,7 +70,36 @@ public class PingApplication {
 	public boolean addHost(@RequestBody String hostName) {
 		System.out.println("HostName: "+hostName);
 		
+		//in case of an ip address is supplied, check if it is valid
+		if(isValidIpAddress(hostName)) return true;
+		
+		//if host name is not an ip address
+		//validate to check if it a valid domain name with domain extension
+		return isValidHostName(hostName);
+	}
+	
+	/**
+	 * Utility method which verifies the host name.
+	 * Assumptions regarding host names:
+	 * No-IP Free host names must be no longer than 19 characters in length. 
+	 * They can contain the letters a-z, numbers 0-9 and special character – (dash).
+	 * 
+	 * Plus Managed DNS host names can be up to 49 characters in length. 
+	 * They can contain the letters a-z, numbers 0-9 and special character – (dash).
+	 * 
+	 * Basic Host name Guidelines:
+	 * You cannot have more than two dashes within a host name.
+	 * A host name cannot have any spaces, nor can it start with a dash.
+	 * @param hostName
+	 * @return
+	 */
+	private boolean isValidHostName(String hostName){
 		if(!hostName.contains(".")) return false;
+		
+		//check if the host name contains www
+		String www_regex = "^www\\.";
+		Matcher www_matcher = Pattern.compile(www_regex).matcher(hostName);
+		if(www_matcher.find()){hostName = hostName.substring(4,hostName.length());}
 		
 		String[] vals = hostName.split("\\.",2);
 		
@@ -86,7 +111,7 @@ public class PingApplication {
 		Matcher m1 = Pattern.compile(regex1).matcher(vals[0]);
 		Matcher m2 = Pattern.compile(regex2).matcher(vals[1]);
 		
-		if(m1.find() && m2.find()){
+		if(m1.matches() && m2.matches()){
 			System.out.println("Valid.");
 			return true;
 		}
@@ -94,6 +119,16 @@ public class PingApplication {
 			System.out.println("Invalid!");
 			return false;
 		}
+	}
+	
+	/**
+	 * Utility method uses org.apache.commons.validator.routines.InetAddressValidator
+	 * to confirm a valid ip address
+	 * @param hostName
+	 * @return
+	 */
+	private boolean isValidIpAddress(String hostName){
+		return validator.isValid(hostName);
 	}
 	
 	/**
