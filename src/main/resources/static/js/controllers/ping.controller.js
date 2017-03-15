@@ -1,17 +1,41 @@
-angular.module('ping', [])
-  .controller('mainCtrl', function($scope, $http, $interval) {
+app.controller('PingController', function($scope, $http, $timeout, UserService, FlashService, $rootScope, $location) {
 	$scope.hosts = [];
+	$scope.user = null;
+	var timer = null;
+
+	loadCurrentUser();
 	
+    function loadCurrentUser() {
+        UserService.GetByUsername($rootScope.globals.currentUser.username)
+            .then(function (user) {
+                $scope.user = user;
+            });
+    }
+    
+    $scope.logout = function(){
+    	//stop the ping functionality
+    	$timeout.cancel(timer);
+    	//navigate back to login page
+    	$location.path('/login');
+    }
+    
+    //wrapper function to allow pinging every 10 seconds
+    function wrapper(){
+    	ping();
+    	timer = $timeout(wrapper,10000);
+    }
+    timer = $timeout(wrapper,10000);
+    
 	/**
 	*	Flips host selection.
 	*/
 	$scope.select = function(host){
 		host.isSelected = !host.isSelected;
 		if(host.isSelected){
-			$scope.out = "Selected: "+host.name;
+			FlashService.Success("Selected "+host.name);
 		}
 		else{
-			$scope.out = "Deselected: "+host.name;
+			FlashService.Success("Deselected "+host.name);
 		}
 	}
 	
@@ -23,13 +47,12 @@ angular.module('ping', [])
 		for(var i=0;i<$scope.hosts.length;i++){
 			if($scope.hosts[i].isSelected){
 				var val = $scope.hosts[i].name;
-				print("Deleted: "+val);
 				count++;
 				$scope.hosts.splice(i,1);
 				i--;
 			}
 		}
-		$scope.out = "Deleted: "+count+" hosts.";
+		FlashService.Success("Deleted "+count+ " hosts.");
 	}
 	
 	/**
@@ -42,7 +65,6 @@ angular.module('ping', [])
 		try{
 			//nothing supplied
 			if(!$scope.host) throw "No input!";
-			$scope.out = "";
 			
 			var host_name = $scope.host.toLowerCase();
 			
@@ -55,39 +77,37 @@ angular.module('ping', [])
 	
 			//validate host name from server
 			$http.post('/add-host',host_name)
-				.success(function(data){
-					if(!data) {
-						console.log("Input invalid!");
-						$scope.out = "Input invalid!";
+				.then(function(data){
+					var value = data.data;
+					if(!value) {
+						FlashService.Error("Invalid host!",false);
 						return;
 					}
 					$scope.host = "";//clear the input text box
 					var obj = {"name":host_name,"time":null,"isSelected":false};
 					$scope.hosts.push(obj);
-					console.log("Add successful.");
-					$scope.out = "Success.";
+					FlashService.Success("Added successfully.");
 				})
-				.error(function(data){
-					print("Add error!");
-					$scope.out = "Error occured!";
+				.catch(function(data){
+					print("Add error! "+data);
+					FlashService.Error("Error at server!");
 				});
 		}
 		catch(err){
-			print("Error: "+err);
-			$scope.out = err;
+			FlashService.Error(err.Message);
 		}
 	}
-	 
+	
 	/**
 	* Method pings all the hosts every 10 seconds and 
 	* update the table with new response times
 	*/
-	ping = $interval(function(){
+	ping = function(){
+		print("Pinging....");
 		if($scope.hosts.length==0) {
 			console.log("List empty!");
 			return;
 		}
-		print("pinging...");
 		var AllHosts = [];
 		angular.forEach($scope.hosts,function(host){
 			AllHosts.push(host.name);
@@ -95,24 +115,23 @@ angular.module('ping', [])
 		
 		//requests the server to ping and return response times
 		$http.post('/ping-host',AllHosts.toString())
-			.success(function(data){
-				// console.log(data);
+			.then(function(data){
+				var value = data.data;
 				angular.forEach($scope.hosts,function(host){
-					for(var key in data){
+					for(var key in value){
 						if(key==host.name){
-							var time = data[key];
-							delete data[key];//delete this key to ignore another comparison
+							var time = value[key];
+							delete value[key];//delete this key to ignore another comparison
 							if(!time) time = "NoResponse";
 							host.time = time;
 						}
 					}
 				})
-				print("Ping successful.");
 			})
-			.error(function(){
-				print("Ping error!");
+			.catch(function(err){
+				FlashService.Error(err.data);
 			});
-	},10000);
+	}
 	
 	print = function(msg){
 		var date = new Date();
@@ -124,5 +143,4 @@ angular.module('ping', [])
 			        + date.getSeconds();
 		console.log("["+time+"]	"+msg);
 	}
- 
 });

@@ -1,11 +1,5 @@
 package com.example;
 
-import java.util.Arrays;
-
-/**
- * 
- * **/
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -13,9 +7,6 @@ import java.util.regex.Pattern;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import org.apache.commons.validator.routines.InetAddressValidator;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,9 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.http.HttpStatus;
 
-@SpringBootApplication
 @RestController
-public class PingApplication {
+public class PingController {
 
 	//a validator to validate ip address
 	static InetAddressValidator validator = InetAddressValidator.getInstance();
@@ -42,19 +32,19 @@ public class PingApplication {
 	consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
 	@ResponseStatus(value = HttpStatus.OK)
 	public Map<String,Integer> pingAll(@RequestBody String hostList) {
-		long startTime = System.currentTimeMillis();
+		
 		Map<String,Integer> result = new HashMap<String,Integer>();
 		String[] hosts = hostList.split(",");
 		
-		 Arrays.asList(hosts)
-			 .stream()
-			 .forEach(host -> result.put(host,ping(host)));
-		
-//		for(int i=0;i<hosts.length;i++){
-//			String host = hosts[i];
-//			result.put(host,ping(host));
-//		}
-		System.out.println("time: "+(System.currentTimeMillis()-startTime));
+//		 Arrays.asList(hosts)
+//			 .stream()
+//			 .forEach(host -> result.put(host,ping(host)));
+		 
+		 for(String host : hosts){
+			 Integer time = ping(host);
+			 result.put(host,time);
+		 }
+		 
 		return result;
 	}
 	
@@ -68,7 +58,7 @@ public class PingApplication {
 	consumes = MimeTypeUtils.ALL_VALUE)
 	@ResponseStatus(value = HttpStatus.OK)
 	public boolean addHost(@RequestBody String hostName) {
-		System.out.println("HostName: "+hostName);
+		print("HostName: "+hostName);
 		
 		//in case of an ip address is supplied, check if it is valid
 		if(isValidIpAddress(hostName)) return true;
@@ -112,11 +102,11 @@ public class PingApplication {
 		Matcher m2 = Pattern.compile(regex2).matcher(vals[1]);
 		
 		if(m1.matches() && m2.matches()){
-			System.out.println("Valid.");
+			print("Valid.");
 			return true;
 		}
 		else{
-			System.out.println("Invalid!");
+			print("Invalid!");
 			return false;
 		}
 	}
@@ -175,17 +165,13 @@ public class PingApplication {
 				}
             }   
         } catch (Exception ex) {
-            System.out.println("Error: "+ex.getMessage());
+            print("Error: "+ex.getMessage());
             return null;
         }
     	return time;
 	}
-
-	/**
-	 * Starting point.
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(PingApplication.class, args);
+	
+	static void print(String msg){
+		System.out.println(msg);
 	}
 }

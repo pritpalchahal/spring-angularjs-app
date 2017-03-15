@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<div >
+    <div>
+		<h2>Welcome {{user.firstname}}!
+			<button ng-click="logout()" class="btn btn-primary pull-right">Logout</button>
+		</h2>
+		<p>&nbsp;</p>
+		<div style="margin-top:10px;margin-bottom:10px">
+			<h4>Add new host</h4>
+			<p><input type="text" id="input_box" ng-model="host" style="width:100%"/></p>
+			<p><button ng-click="addHost()" class="btn btn-success">Submit</button></p>
+			<div ng-class="{ 'alert': flash, 'alert-success': flash.type === 'success', 'alert-danger': flash.type === 'error' }"
+			     ng-if="flash" ng-bind="flash.message"></div>
+		</div>
+		<p><button ng-click="delete()" class="btn btn-danger">Delete Selected</button></p>
+		<table class="table table-stripped" border="2">
+			<thead>
+			<tr>
+				<th>#</th>
+				<th>Index</th>
+				<th>Host Name</th>
+				<th>Response Time</th>
+			</tr>
+			<thead>
+			<tbody>
+			<tr ng-repeat="host in hosts">
+				<th>
+					<input type="checkbox" ng-click="select(host)">
+				</th>
+				<td>{{$index}}</td>
+				<td>{{host.name}}</td>
+				<td class="table-success">{{host.time}}</td>
+			</tr>
+			</tbody>
+		</table>
+    </div>
+   </div>
+</html>

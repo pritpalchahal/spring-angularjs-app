@@ -1,56 +1,43 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html lang="en" ng-app="app" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" ng-app="app" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" ng-app="app" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en" ng-app="app" class="no-js"> <!--<![endif]-->
 <head>
-<title>Ping Application</title>
-<link href="css/angular-bootstrap.css" rel="stylesheet">
-<style type="text/css">
-[ng\:cloak], [ng-cloak], .ng-cloak {
-  display: none !important;
-}
-table {
-    font-family: arial, sans-serif;
-    border-collapse: collapse;
-    width: 100%;
-}
-
-td, th {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 5px;
-}
-</style>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Spring boot and Angularjs Tutorial</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/app.css">
+    
+    <!-- Latest compiled and minified bootstrap CSS -->
+	<link rel="stylesheet" 
+		href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" 
+		integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" 
+		crossorigin="anonymous">
 </head>
-
-<body ng-app="ping">
-  <div class="container">
-    <h1>Ping Application</h1>
-    <div ng-controller="mainCtrl" ng-cloak class="ng-cloak">
-		<div style="margin-top:10px;margin-bottom:40px">
-			<h4>Add new host</h4>
-			<p><input type="text" id="input_box" ng-model="host" style="width:100%"/></p>
-			<p><button ng-click="addHost()">Submit</button></p>
-			<p>{{out}}</p>
-		</div>
-		<p><button ng-click="delete()">Delete Selected</button></p>
-		<table border="2">
-			<tr>
-				<td></td>
-				<td>Index</td>
-				<td>Host Name</td>
-				<td>Response Time</td>
-			</tr>
-			<tr ng-repeat="host in hosts">
-				<td>
-					<input type="checkbox" ng-click="select(host)">
-				</td>
-				<td>{{$index}}</td>
-				<td>{{host.name}}</td>
-				<td>{{host.time}}</td>
-			</tr>
-		</table>
+<body>
+<div class="jumbotron">
+        <div class="container">
+            <div class="col-sm-8 col-sm-offset-2">
+                <div ng-view></div>
+            </div>
+        </div>
     </div>
-  </div>
-  <script src="js/angular-bootstrap.js" type="text/javascript"></script>
-  <script src="js/ping.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular-route.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular-resource.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular-cookies.min.js"></script>
+  
+  <script src="js/main/app.js"></script>
+  
+  <script src="js/services/authentication.service.js"></script>
+  <script src="js/services/flash.service.js"></script>
+  <script src="js/services/user.service.js"></script>
+  
+  <script src="js/controllers/ping.controller.js"></script>
+  <script src="js/controllers/login.controller.js"></script>
+  <script src="js/controllers/register.controller.js"></script>
 </body>
 </html>
